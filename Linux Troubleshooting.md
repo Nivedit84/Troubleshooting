@@ -32,3 +32,19 @@ Linux Troubleshooting
     1. Run:
         $du -h --max-depth=1 /var | sort -rh --> only tells the size of sub directories under /var and presents in a reverse order
     2. Files are identified, then go the most consuming directory and compress files or remove unncessaryfiles, can use logrotate for this
+
+4. After a power failure, filesystem has become read-only, cannot create files on that
+-- This basically happens due to system crashes, shutdowns, I/O errors, etc
+    1. First check kernel logs to see what exactly happened
+        $sudo dmesg
+            Look for EXT4-fs, I/O erros
+    2. After checking, go to /etc/fstab and check the config of this file, go to your filesystem and see options, high possibility it would be in ro state
+        $sudo vi /etc/fstab
+            if option is ro, change it to defaults
+    3. First we need to unmount it and repair it in case of root,
+        $sudo umount <filesystem>
+        $sudo fsck -y <filesystem>  --> checks the files for error and repairs them (File System Consistency Check)
+    4. Then remount the filesystem to your mount point with read-write persmissions using
+        $sudo mount -o remount,rw <mount_point>
+            -o --> options
+    5. No need for a reboot after this, just create a file in the mount point and verify whether it is working or not
